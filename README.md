@@ -1,4 +1,4 @@
-# NES32
+# PocketNES
 
 一款面向 **ESP32-S3** 的掌机 **NES 模拟器固件** —— 基于 [Retro-Go](https://github.com/ducalex/retro-go) 框架与 [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) 核心，显示驱动采用 **LovyanGFX**，界面完整本地化为**简体中文**。
 
@@ -9,7 +9,7 @@
 把 `.nes` ROM 拷到 SD 卡，通过内置文件浏览器选中游戏，即可全速带声游玩。菜单、文件浏览器、设置、提示框等全部界面均提供简体中文。
 
 <!-- 在这里放一张真机照片，比任何文字都更有说服力 -->
-<!-- ![NES32 掌机](docs/screenshot.png) -->
+<!-- ![PocketNES 掌机](docs/screenshot.png) -->
 
 ## 功能特性
 
@@ -169,4 +169,4 @@ pio device monitor -b 115200
 - [u8g2 / efont](https://github.com/olikraus/u8g2)（olikraus）—— 中文字形数据
 - [cJSON](https://github.com/DaveGamble/cJSON) 与 [lodepng](https://lodev.org/lodepng/)
 
-Retro-Go 与 nofrendo 采用 **GPL-2.0** 许可，因此本项目同样以该许可发布。完整许可文本见 `LICENSE`（如仓库中还没有该文件，请补充 GPL-2.0 文本）。
+Retro-Go 与 nofrendo 采用 **GPL-2.0** 许可，因此本项目同样以该许可发布。完整许可文本见 `LICENSE`。
