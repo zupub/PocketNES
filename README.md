@@ -6,6 +6,10 @@ A handheld **NES emulator firmware for ESP32-S3** — built on the [Retro-Go](ht
 ![ESP32-S3](https://img.shields.io/badge/MCU-ESP32--S3%20N16R8-red)
 ![License](https://img.shields.io/badge/License-GPL--2.0-green)
 
+<p align="center">
+  <strong><a href="README.md">English</a> | <a href="README_CN.md">中文</a></strong>
+</p>
+
 Drop `.nes` ROMs on an SD card, pick a game from the built-in file browser and play at full speed with sound. Every part of the UI — menus, file browser, settings, alerts — is available in Simplified Chinese.
 
 <!-- Add a photo of your device here, it sells the project better than any text -->
