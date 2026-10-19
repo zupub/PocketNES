@@ -6,6 +6,10 @@
 ![ESP32-S3](https://img.shields.io/badge/MCU-ESP32--S3%20N16R8-red)
 ![License](https://img.shields.io/badge/License-GPL--2.0-green)
 
+<p align="center">
+  <strong><a href="README.md">English</a> | <a href="README_CN.md">中文</a></strong>
+</p>
+
 把 `.nes` ROM 拷到 SD 卡，通过内置文件浏览器选中游戏，即可全速带声游玩。菜单、文件浏览器、设置、提示框等全部界面均提供简体中文。
 
 <!-- 在这里放一张真机照片，比任何文字都更有说服力 -->
