@@ -2,9 +2,13 @@
 
 一款面向 **ESP32-S3** 的掌机 **NES 模拟器固件** —— 基于 [Retro-Go](https://github.com/ducalex/retro-go) 框架与 [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) 核心，显示驱动采用 **LovyanGFX**，界面完整本地化为**简体中文**。
 
+<div align="center">
+
 ![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32-blue)
 ![ESP32-S3](https://img.shields.io/badge/MCU-ESP32--S3%20N16R8-red)
 ![License](https://img.shields.io/badge/License-GPL--2.0-green)
+
+</div>
 
 <p align="center">
   <strong><a href="README.md">English</a> | <a href="README_CN.md">中文</a></strong>
