@@ -43,6 +43,8 @@ Drop `.nes` ROMs on an SD card, pick a game from the built-in file browser and p
 | Storage | microSD card (FAT32) | On its own SPI bus |
 | Input | 8 tactile buttons | Active-low, internal pull-ups |
 
+The hardware wiring follows the [DIJI-NES](https://github.com/UF-Evan/DIJI-NES) design by UF-Evan.
+
 The display and the SD card **must** be wired to separate SPI peripherals — the firmware puts the panel on `SPI3_HOST` and the SD card on `SPI2_HOST` so they never contend for the bus.
 
 ### Pinout
@@ -177,6 +179,7 @@ This project stands on the shoulders of:
 - [Retro-Go](https://github.com/ducalex/retro-go) by ducalex — framework, GUI, settings, audio pipeline
 - [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) — NES emulation core
 - [LovyanGFX](https://github.com/lovyan03/LovyanGFX) by lovyan03 — display driver
+- [DIJI-NES](https://github.com/UF-Evan/DIJI-NES) by UF-Evan — hardware design and pinout reference
 - [u8g2 / efont](https://github.com/olikraus/u8g2) by olikraus — Chinese glyph data
 - [cJSON](https://github.com/DaveGamble/cJSON) and [lodepng](https://lodev.org/lodepng/)
 

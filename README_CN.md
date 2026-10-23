@@ -43,6 +43,8 @@
 | 存储 | microSD 卡（FAT32） | 使用独立 SPI 总线 |
 | 输入 | 8 个轻触按键 | 低电平有效，内部上拉 |
 
+硬件连接参考了 [DIJI-NES](https://github.com/UF-Evan/DIJI-NES)（UF-Evan）的设计。
+
 屏幕与 SD 卡**必须**接在不同的 SPI 外设上 —— 固件将屏幕分配到 `SPI3_HOST`、SD 卡分配到 `SPI2_HOST`，避免两者争用总线。
 
 ### 引脚定义
@@ -177,6 +179,7 @@ pio device monitor -b 115200
 - [Retro-Go](https://github.com/ducalex/retro-go)（ducalex）—— 框架、GUI、设置系统、音频管线
 - [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) —— NES 模拟核心
 - [LovyanGFX](https://github.com/lovyan03/LovyanGFX)（lovyan03）—— 显示驱动
+- [DIJI-NES](https://github.com/UF-Evan/DIJI-NES)（UF-Evan）—— 硬件连接与引脚定义参考
 - [u8g2 / efont](https://github.com/olikraus/u8g2)（olikraus）—— 中文字形数据
 - [cJSON](https://github.com/DaveGamble/cJSON) 与 [lodepng](https://lodev.org/lodepng/)
 
