@@ -142,6 +142,7 @@ pio device monitor -b 115200
 ```
 ├── platformio.ini              # PlatformIO 环境、编译选项、include 路径
 ├── partitions_nes.csv          # NVS / OTA / 4 MB app 分区表
+├── startup.png                 # 开机画面（编译期嵌入固件，lodepng 解码）
 ├── lib/LovyanGFX/              # 本地 LovyanGFX（已剔除大型中日韩字库）
 └── src/
     ├── main.cpp                # Arduino 入口：rg_system_init() + 模拟器任务
@@ -162,7 +163,7 @@ pio device monitor -b 115200
 
 ## 架构说明
 
-- **启动链路：** `main.cpp` → `rg_system_init()`（初始化屏幕、音频、输入、存储、设置）→ `nes_main()`，此后不再返回。
+- **启动链路：** `main.cpp` → `rg_system_init()`（初始化屏幕、音频、输入、存储、设置）→ `startup.png` 开机画面（约 1.5 秒后清屏）→ `nes_main()`，此后不再返回。
 - **渲染：** 两块 `RG_PIXEL_PAL565_BE` 表面交替写入；`blit_screen()` 按 overscan / 自动裁剪处理后，由 `rg_display_submit()` 推流到屏幕。调色板在构建时统一做字节交换，使 GUI 与游戏两条路径共用同一套字节序约定。
 - **LovyanGFX 桥接：** `rg_display.c` 是纯 C 代码，因此由 `lovyangfx_bridge.cpp` 以 `extern "C"` 暴露一套小型 API（`rg_lgfx_*`）。推流时 `setWindow()` 必须包在 `startWrite()/endWrite()` 内（底层窗口命令不会自行开启 SPI 事务），随后调用 `pushPixels()`。
 - **GUI 文本引擎：** `rg_gui.c` 中的自研点阵字体渲染器，支持 UTF-8 解码、多行排版、对齐，以及 `RG_TEXT_ELLIPSIS` 单行省略号截断。

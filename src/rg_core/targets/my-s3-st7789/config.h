@@ -2,6 +2,10 @@
 // Pinout taken from the DIJI-NES hardware (see DIJI-NES README.md)
 #define RG_TARGET_NAME             "MY-S3-ST7789"
 
+// Boot logo: startup.png is embedded via board_build.embed_files (platformio.ini)
+// and decoded at boot. The embed and this switch must be enabled together.
+#define RG_BOOT_LOGO               1
+
 // ---------------- Storage (SD card on SPI) ----------------
 #define RG_STORAGE_ROOT             "/sd"
 // SD lives on SPI2 (FSPI) so the panel can own SPI3, exactly like the

@@ -142,6 +142,7 @@ Hardware and build-time options live in [`src/rg_core/targets/my-s3-st7789/confi
 ```
 ├── platformio.ini              # PlatformIO environment, flags, include paths
 ├── partitions_nes.csv          # NVS / OTA / 4 MB app partition table
+├── startup.png                 # boot splash (embedded at build time, decoded with lodepng)
 ├── lib/LovyanGFX/              # local LovyanGFX copy (large CJK fonts excluded)
 └── src/
     ├── main.cpp                # Arduino entry: rg_system_init() + emulator task
@@ -162,7 +163,7 @@ Hardware and build-time options live in [`src/rg_core/targets/my-s3-st7789/confi
 
 ## Architecture Notes
 
-- **Boot path:** `main.cpp` → `rg_system_init()` (display, audio, input, storage, settings) → `nes_main()` which never returns.
+- **Boot path:** `main.cpp` → `rg_system_init()` (display, audio, input, storage, settings) → `startup.png` boot splash (cleared after ~1.5 s) → `nes_main()` which never returns.
 - **Rendering:** two `RG_PIXEL_PAL565_BE` surfaces are written alternately; `blit_screen()` applies overscan/auto-crop, then `rg_display_submit()` streams to the panel. The palette is byte-swapped at build time so both the GUI and game paths share one byte-order convention.
 - **LovyanGFX bridge:** `rg_display.c` is plain C, so `lovyangfx_bridge.cpp` exposes a small `extern "C"` API (`rg_lgfx_*`). Streaming uses `setWindow()` wrapped in `startWrite()/endWrite()` (the low-level window command does not open a SPI transaction itself) followed by `pushPixels()`.
 - **GUI text engine:** custom bitmap-font renderer in `rg_gui.c` with UTF-8 decoding, multiline layout, alignment and `RG_TEXT_ELLIPSIS` single-line truncation.
