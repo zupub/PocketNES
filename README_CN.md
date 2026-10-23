@@ -16,6 +16,7 @@
 
 把 `.nes` ROM 拷到 SD 卡，通过内置文件浏览器选中游戏，即可全速带声游玩。菜单、文件浏览器、设置、提示框等全部界面均提供简体中文。
 
+![PocketNES 开机画面](assets/pocketnes-boot.png)
 ![PocketNES 掌机](assets/pocketnes-cover.jpg)
 ![PocketNES 掌机](assets/pocketnes-menu.jpg)
 ![PocketNES 掌机](assets/pocketnes-option.jpg)
