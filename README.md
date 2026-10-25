@@ -16,7 +16,7 @@ A handheld **NES emulator firmware for ESP32-S3** — built with **PlatformIO** 
 
 Drop `.nes` ROMs on an SD card, pick a game from the built-in file browser and play at full speed with sound. Every part of the UI — menus, file browser, settings, alerts — is available in Simplified Chinese.
 
-The same firmware also runs on a 2.8" no-button dev board, where a BLE gamepad replaces the button cluster — see [Hardware](#hardware).
+The same firmware also runs on Waveshare's **ESP32-S3-Touch-LCD-2.8** board, where a BLE gamepad replaces the button cluster — see [Hardware](#hardware).
 
 ![PocketNES boot screen](assets/pocketnes-boot.png)
 ![PocketNES handheld](assets/pocketnes-cover.jpg)
@@ -26,10 +26,10 @@ The same firmware also runs on a 2.8" no-button dev board, where a BLE gamepad r
 ## Features
 
 - **Full-speed NES emulation** — nofrendo core with 50+ mappers, 32 kHz I2S audio output
-- **Two hardware targets** — 8-button handheld and a 2.8" no-button board, built from one codebase
+- **Two hardware targets** — 8-button handheld and the button-less Waveshare ESP32-S3-Touch-LCD-2.8, built from one codebase
 - **LovyanGFX display backend** — `Panel_ST7789` on a dedicated SPI3 bus at 80 MHz with DMA, 320×240 landscape UI
 - **BLE gamepad input** — NimBLE HID host scans, pairs and reconnects on its own, and a Bluetooth icon appears in the status bar
-- **Soft power key** — the 2.8" board's power latch is held by the firmware, and a ~2 s press powers the device off
+- **Soft power key** — the Waveshare board's battery-power latch is held by the firmware, and a ~2 s press powers the device off
 - **Complete Simplified Chinese interface** — 206 translated strings plus a 16×16 bitmap font with 7,544 glyphs (English / French / German are still available in the language menu)
 - **File browser** — UTF-8 filenames, long names are truncated with an ellipsis instead of wrapping
 - **Save states** — one slot per ROM, stored on SD
@@ -45,7 +45,7 @@ One codebase, two board profiles. Pick the PlatformIO environment that matches y
 | Board | Display | Input | Environment |
 |-------|---------|-------|-------------|
 | 8-button handheld (DIJI-NES) | ST7789 240×320 SPI | 8 GPIO buttons | `nes-s3-st7789` |
-| 2.8" no-button board (DIJI-NES-0.5.0-2.8) | ST7789 240×320 SPI | BLE gamepad + power/BOOT keys | `nes-s3-st7789-ble` |
+| Waveshare ESP32-S3-Touch-LCD-2.8 | ST7789 240×320 SPI + CST328 touch | BLE gamepad + BOOT / power keys | `nes-s3-st7789-ble` |
 
 ### 8-button handheld (DIJI-NES)
 
@@ -101,23 +101,25 @@ The display and the SD card **must** be wired to separate SPI peripherals — th
 | Left | 8 | Select | 16 |
 | Right | 18 | Start | 15 |
 
-### 2.8" no-button board + BLE gamepad
+### Waveshare ESP32-S3-Touch-LCD-2.8 + BLE gamepad
 
-The 2.8" variant has no button cluster at all — no d-pad, no A/B and no MENU key on the PCB. It is wired for the DIJI-NES-0.5.0-2.8 board and is played entirely from a BLE gamepad:
+This is Waveshare's [ESP32-S3-Touch-LCD-2.8](https://docs.waveshare.net/ESP32-S3-Touch-LCD-2.8/) board (SKU 27690). It has no d-pad, no A/B and no MENU key, so it is played entirely from a BLE gamepad:
 
-- **Input** — a BLE HID gamepad supplies d-pad/A/B/Select/Start (see [Controls](#controls)); on the PCB only BOOT (GPIO 0) and the power key remain, and they drive the recovery menu.
-- **Display** — the same ST7789 panel on SPI3, with SCLK 40 / MOSI 45 / DC 41 / CS 42 / RST 39 and a PWM-dimmable backlight on GPIO 5 (which is why the Brightness option appears).
-- **SD card** — SPI2 on CS 21 / CLK 14 / MISO 16 / MOSI 17, clocked at 5 MHz.
-- **Audio** — MAX98357A on BCLK 48 / LRCLK 38 / DIN 47.
-- **Power** — soft-power latch: the power key (GPIO 6) switches the rail on and the firmware holds it through GPIO 7. Hold it ~2 s to power off; a short press does nothing outside the recovery menu.
-- **Battery** — ADC on GPIO 8 through a 1:3 divider.
+- **Input** — a BLE HID gamepad supplies d-pad/A/B/Select/Start (see [Controls](#controls)); on the PCB only BOOT (GPIO 0) and the BAT power key remain, and they drive the recovery menu.
+- **Display** — the onboard ST7789 panel on SPI3, with SCLK 40 / MOSI 45 / DC 41 / CS 42 / RST 39 and a PWM-dimmable backlight on GPIO 5 (which is why the Brightness option appears).
+- **SD card** — the microSD slot on SPI2 with CS 21 / CLK 14 / MISO 16 / MOSI 17, clocked at 5 MHz.
+- **Audio** — the onboard PCM5101A DAC and amplifier on I2S BCLK 48 / LRCLK 38 / DIN 47; the board's volume knob still works.
+- **Power** — soft-power latch: the BAT key (GPIO 6) switches the rail on and the firmware holds it through GPIO 7. Hold it ~2 s to power off; a short press does nothing outside the recovery menu.
+- **Battery** — the MX1.25 cell input, read on GPIO 8 through a 1:3 divider.
+
+The capacitive touch panel (CST328 on V1, CST3530 on V2), QMI8658 IMU, PCF85063 RTC and charge management are not used by the firmware.
 
 The complete pin map lives in [`src/rg_core/targets/my-s3-st7789-ble/config.h`](src/rg_core/targets/my-s3-st7789-ble/config.h).
 
 <!-- TODO(photo): replace this placeholder with the real photo, keeping the same path:
-     ![PocketNES on the 2.8" no-button board](assets/pocketnes-28-ble.jpg) -->
+     ![PocketNES on the Waveshare ESP32-S3-Touch-LCD-2.8](assets/pocketnes-28-ble.jpg) -->
 
-> **Photo placeholder** — `assets/pocketnes-28-ble.jpg`: the 2.8" no-button board with a BLE gamepad connected.
+> **Photo placeholder** — `assets/pocketnes-28-ble.jpg`: the Waveshare ESP32-S3-Touch-LCD-2.8 with a BLE gamepad connected.
 
 ## Build & Flash
 
@@ -127,7 +129,7 @@ Requirements: [PlatformIO](https://platformio.org/) (Core CLI or the VS Code ext
 # Build the 8-button handheld
 pio run -e nes-s3-st7789
 
-# Build the 2.8" no-button board (BLE gamepad)
+# Build the Waveshare ESP32-S3-Touch-LCD-2.8 (BLE gamepad)
 pio run -e nes-s3-st7789-ble
 
 # Flash (auto-detected port, or pass --upload-port COM5 / /dev/ttyUSB0)
@@ -165,9 +167,9 @@ The file browser opens in `/sd/nes` on boot.
 
 The in-game menu offers resume, save state, load state, reset, options and screenshot.
 
-### BLE gamepad (2.8" board)
+### BLE gamepad (Waveshare board)
 
-The 2.8" board has no buttons, so the gamepad is the controller. Put it in Android/BLE mode (not X-input or Switch) and switch the device on — the firmware scans for it at boot and reconnects by itself after a disconnect.
+The Waveshare board has no gamepad buttons, so the pad is the only controller. Put it in Android/BLE mode (not X-input or Switch) and switch the device on — the firmware scans for it at boot and reconnects by itself after a disconnect.
 
 | Gamepad | PocketNES |
 |---------|-----------|
@@ -187,7 +189,7 @@ A Bluetooth icon appears in the status bar while a pad is connected.
 Hardware and build-time options live in the `config.h` of the selected target:
 
 - [`src/rg_core/targets/my-s3-st7789/config.h`](src/rg_core/targets/my-s3-st7789/config.h) — 8-button handheld
-- [`src/rg_core/targets/my-s3-st7789-ble/config.h`](src/rg_core/targets/my-s3-st7789-ble/config.h) — 2.8" no-button board
+- [`src/rg_core/targets/my-s3-st7789-ble/config.h`](src/rg_core/targets/my-s3-st7789-ble/config.h) — Waveshare ESP32-S3-Touch-LCD-2.8
 
 The main options:
 
@@ -227,7 +229,7 @@ The main options:
         ├── fonts/efontCN16.c   # 16x16 Chinese bitmap font (7,544 glyphs)
         └── targets/
             ├── my-s3-st7789/config.h     # 8-button handheld
-            └── my-s3-st7789-ble/config.h # 2.8" no-button BLE board
+            └── my-s3-st7789-ble/config.h # Waveshare ESP32-S3-Touch-LCD-2.8 (BLE)
 ```
 
 ## Architecture Notes
@@ -247,7 +249,8 @@ This project stands on the shoulders of:
 - [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) — NES emulation core
 - [LovyanGFX](https://github.com/lovyan03/LovyanGFX) by lovyan03 — display driver
 - [NimBLE-Arduino](https://github.com/h2zero/NimBLE-Arduino) by h2zero — BLE HID host for the gamepad
-- [DIJI-NES](https://github.com/UF-Evan/DIJI-NES) by UF-Evan — hardware design and pinout reference
+- [DIJI-NES](https://github.com/UF-Evan/DIJI-NES) by UF-Evan — 8-button handheld hardware design and pinout reference
+- [Waveshare ESP32-S3-Touch-LCD-2.8](https://docs.waveshare.net/ESP32-S3-Touch-LCD-2.8/) — the 2.8" test board and its official pinout
 - [u8g2 / efont](https://github.com/olikraus/u8g2) by olikraus — Chinese glyph data
 - [cJSON](https://github.com/DaveGamble/cJSON) and [lodepng](https://lodev.org/lodepng/)
 

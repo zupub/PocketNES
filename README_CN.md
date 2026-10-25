@@ -16,7 +16,7 @@
 
 把 `.nes` ROM 拷到 SD 卡，通过内置文件浏览器选中游戏，即可全速带声游玩。菜单、文件浏览器、设置、提示框等全部界面均提供简体中文。
 
-同一份固件还可运行在 2.8 寸无按键开发板上，此时由 BLE 手柄替代实体按键 —— 详见[硬件](#硬件)。
+同一份固件还可运行在微雪 **ESP32-S3-Touch-LCD-2.8** 开发板上，此时由 BLE 手柄替代实体按键 —— 详见[硬件](#硬件)。
 
 ![PocketNES 开机画面](assets/pocketnes-boot.png)
 ![PocketNES 掌机](assets/pocketnes-cover.jpg)
@@ -26,10 +26,10 @@
 ## 功能特性
 
 - **全速 NES 模拟** —— nofrendo 核心，支持 50+ 种 mapper，32 kHz I2S 音频输出
-- **双硬件目标** —— 8 键掌机与 2.8 寸无按键开发板共用同一套代码
+- **双硬件目标** —— 8 键掌机与无按键的微雪 ESP32-S3-Touch-LCD-2.8 共用同一套代码
 - **LovyanGFX 显示后端** —— `Panel_ST7789` 独占 SPI3 总线，80 MHz 主频，DMA 推流，320×240 横屏界面
 - **BLE 手柄输入** —— NimBLE HID 主机自动扫描、配对与重连，连接后状态栏显示蓝牙图标
-- **软电源键** —— 2.8 寸板的电源锁存由固件维持，长按约 2 秒可关机
+- **软电源键** —— 微雪板的电池供电锁存由固件维持，长按约 2 秒可关机
 - **完整简体中文界面** —— 206 条翻译文案 + 7544 字形的 16×16 点阵字库（语言菜单中仍可切换英文 / 法文 / 德文）
 - **文件浏览器** —— 支持 UTF-8 文件名，超长文件名自动省略号截断，不再折行
 - **即时存档** —— 每个 ROM 一个存档位，保存在 SD 卡
@@ -45,7 +45,7 @@
 | 板型 | 屏幕 | 输入 | 编译环境 |
 |------|------|------|----------|
 | 8 键掌机（DIJI-NES） | ST7789 240×320 SPI | 8 个 GPIO 按键 | `nes-s3-st7789` |
-| 2.8 寸无按键开发板（DIJI-NES-0.5.0-2.8） | ST7789 240×320 SPI | BLE 手柄 + 电源/BOOT 键 | `nes-s3-st7789-ble` |
+| 微雪 ESP32-S3-Touch-LCD-2.8 | ST7789 240×320 SPI + CST328 触摸 | BLE 手柄 + BOOT/电源键 | `nes-s3-st7789-ble` |
 
 ### 8 键掌机（DIJI-NES）
 
@@ -101,23 +101,25 @@
 | 左 | 8 | Select | 16 |
 | 右 | 18 | Start | 15 |
 
-### 2.8 寸无按键开发板 + BLE 手柄
+### 微雪 ESP32-S3-Touch-LCD-2.8 + BLE 手柄
 
-2.8 寸版本完全没有按键区 —— PCB 上没有方向键、没有 A/B、也没有 MENU 键。它按 DIJI-NES-0.5.0-2.8 板型接线，全部操作都来自 BLE 手柄：
+这是微雪的 [ESP32-S3-Touch-LCD-2.8](https://docs.waveshare.net/ESP32-S3-Touch-LCD-2.8/) 开发板（SKU 27690）。板上没有方向键、A/B 与 MENU 键，全部操作都来自 BLE 手柄：
 
-- **输入** —— 方向键 / A / B / Select / Start 均由 BLE HID 手柄提供（见[按键操作](#按键操作)）；板上只保留 BOOT（GPIO 0）与电源键，用于恢复菜单。
-- **屏幕** —— 同样是 SPI3 上的 ST7789：SCLK 40 / MOSI 45 / DC 41 / CS 42 / RST 39，背光在 GPIO 5 上支持 PWM 调光（因此菜单里有亮度选项）。
-- **SD 卡** —— SPI2：CS 21 / CLK 14 / MISO 16 / MOSI 17，时钟 5 MHz。
-- **音频** —— MAX98357A：BCLK 48 / LRCLK 38 / DIN 47。
-- **电源** —— 软开关锁存：电源键（GPIO 6）开机时接通供电，固件通过 GPIO 7 维持锁存。长按约 2 秒关机；短按在恢复菜单之外不做任何事。
-- **电池** —— GPIO 8 经 1:3 分压后接 ADC。
+- **输入** —— 方向键 / A / B / Select / Start 均由 BLE HID 手柄提供（见[按键操作](#按键操作)）；板上只保留 BOOT（GPIO 0）与 BAT 电源键，用于恢复菜单。
+- **屏幕** —— 板载 ST7789：SPI3，SCLK 40 / MOSI 45 / DC 41 / CS 42 / RST 39，背光在 GPIO 5 上支持 PWM 调光（因此菜单里有亮度选项）。
+- **SD 卡** —— microSD 卡座，SPI2：CS 21 / CLK 14 / MISO 16 / MOSI 17，时钟 5 MHz。
+- **音频** —— 板载 PCM5101A DAC 与功放：BCLK 48 / LRCLK 38 / DIN 47，板上音量旋钮依然有效。
+- **电源** —— 软开关锁存：BAT 电源键（GPIO 6）开机时接通供电，固件通过 GPIO 7 维持锁存。长按约 2 秒关机；短按在恢复菜单之外不做任何事。
+- **电池** —— MX1.25 电池接口，GPIO 8 经 1:3 分压后接 ADC。
+
+电容触摸屏（V1 为 CST328、V2 为 CST3530）、QMI8658 六轴传感器、PCF85063 RTC 与充电管理均未被固件使用。
 
 完整引脚映射见 [`src/rg_core/targets/my-s3-st7789-ble/config.h`](src/rg_core/targets/my-s3-st7789-ble/config.h)。
 
 <!-- TODO(photo)：拿到实拍图后替换本占位块，保持同一路径：
-     ![PocketNES 在 2.8 寸无按键开发板上](assets/pocketnes-28-ble.jpg) -->
+     ![PocketNES 在微雪 ESP32-S3-Touch-LCD-2.8 上](assets/pocketnes-28-ble.jpg) -->
 
-> **配图占位** —— `assets/pocketnes-28-ble.jpg`：2.8 寸无按键开发板连接 BLE 手柄的实拍图。
+> **配图占位** —— `assets/pocketnes-28-ble.jpg`：微雪 ESP32-S3-Touch-LCD-2.8 连接 BLE 手柄的实拍图。
 
 ## 构建与烧录
 
@@ -127,7 +129,7 @@
 # 编译 8 键掌机
 pio run -e nes-s3-st7789
 
-# 编译 2.8 寸无按键开发板（BLE 手柄）
+# 编译微雪 ESP32-S3-Touch-LCD-2.8（BLE 手柄）
 pio run -e nes-s3-st7789-ble
 
 # 烧录（自动检测串口，也可加 --upload-port COM5 / /dev/ttyUSB0 指定）
@@ -165,9 +167,9 @@ pio device monitor -b 115200
 
 游戏内菜单提供：继续游戏、存档、读档、重置、选项设置和截图。
 
-### BLE 手柄（2.8 寸板）
+### BLE 手柄（微雪开发板）
 
-2.8 寸板没有实体按键，手柄就是唯一控制器。请把手柄切到 Android/BLE 模式（不是 X-input 或 Switch 模式）后开机 —— 固件会自动扫描，断线后自动重连。
+微雪板没有手柄按键，手柄就是唯一控制器。请把手柄切到 Android/BLE 模式（不是 X-input 或 Switch 模式）后开机 —— 固件会自动扫描，断线后自动重连。
 
 | 手柄 | PocketNES |
 |------|-----------|
@@ -187,7 +189,7 @@ pio device monitor -b 115200
 硬件与构建期选项集中定义在所选 target 的 `config.h` 中：
 
 - [`src/rg_core/targets/my-s3-st7789/config.h`](src/rg_core/targets/my-s3-st7789/config.h) —— 8 键掌机
-- [`src/rg_core/targets/my-s3-st7789-ble/config.h`](src/rg_core/targets/my-s3-st7789-ble/config.h) —— 2.8 寸无按键开发板
+- [`src/rg_core/targets/my-s3-st7789-ble/config.h`](src/rg_core/targets/my-s3-st7789-ble/config.h) —— 微雪 ESP32-S3-Touch-LCD-2.8
 
 主要选项：
 
@@ -227,7 +229,7 @@ pio device monitor -b 115200
         ├── fonts/efontCN16.c   # 16×16 中文点阵字库（7544 字形）
         └── targets/
             ├── my-s3-st7789/config.h     # 8 键掌机
-            └── my-s3-st7789-ble/config.h # 2.8 寸无按键 BLE 开发板
+            └── my-s3-st7789-ble/config.h # 微雪 ESP32-S3-Touch-LCD-2.8（BLE）
 ```
 
 ## 架构说明
@@ -247,7 +249,8 @@ pio device monitor -b 115200
 - [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) —— NES 模拟核心
 - [LovyanGFX](https://github.com/lovyan03/LovyanGFX)（lovyan03）—— 显示驱动
 - [NimBLE-Arduino](https://github.com/h2zero/NimBLE-Arduino)（h2zero）—— 手柄用的 BLE HID 主机
-- [DIJI-NES](https://github.com/UF-Evan/DIJI-NES)（UF-Evan）—— 硬件连接与引脚定义参考
+- [DIJI-NES](https://github.com/UF-Evan/DIJI-NES)（UF-Evan）—— 8 键掌机硬件连接与引脚定义参考
+- [Waveshare ESP32-S3-Touch-LCD-2.8](https://docs.waveshare.net/ESP32-S3-Touch-LCD-2.8/) —— 2.8 寸测试板及其官方引脚定义
 - [u8g2 / efont](https://github.com/olikraus/u8g2)（olikraus）—— 中文字形数据
 - [cJSON](https://github.com/DaveGamble/cJSON) 与 [lodepng](https://lodev.org/lodepng/)
 
