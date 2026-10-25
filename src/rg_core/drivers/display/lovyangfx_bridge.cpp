@@ -25,11 +25,13 @@
 #include <LovyanGFX.hpp>
 #include <driver/spi_master.h> // SPI_MASTER_FREQ_* (used by RG_SCREEN_SPEED)
 
+#include "rg_system.h"
+
+// RG_GPIO_LCD_BCKL comes from the target config.h, which rg_system.h pulls in
+// above - the guard must sit after it or driver/ledc.h is never included.
 #ifdef RG_GPIO_LCD_BCKL
 #include <driver/ledc.h>
 #endif
-
-#include "rg_system.h"
 
 #include "lovyangfx_bridge.h"
 
@@ -159,19 +161,27 @@ bool rg_lgfx_init(void)
 #endif
 
 #ifdef RG_GPIO_LCD_BCKL
-    ledc_timer_config(&(ledc_timer_config_t){
-        .duty_resolution = LEDC_TIMER_13_BIT,
-        .freq_hz = 5000,
+    // Local structs (not C99 compound literals): C++ requires the designated
+    // initializers to follow the field declaration order in driver/ledc.h.
+    ledc_timer_config_t ledc_timer = {
         .speed_mode = LEDC_LOW_SPEED_MODE,
+        .duty_resolution = LEDC_TIMER_13_BIT,
         .timer_num = LEDC_TIMER_0,
-    });
-    ledc_channel_config(&(ledc_channel_config_t){
-        .channel = LEDC_CHANNEL_0,
-        .duty = 0, // Avoid the flash caused by the panel reset
+        .freq_hz = 5000,
+        .clk_cfg = LEDC_AUTO_CLK,
+    };
+    ledc_timer_config(&ledc_timer);
+
+    ledc_channel_config_t ledc_channel = {
         .gpio_num = RG_GPIO_LCD_BCKL,
         .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = LEDC_CHANNEL_0,
+        .intr_type = LEDC_INTR_DISABLE,
         .timer_sel = LEDC_TIMER_0,
-    });
+        .duty = 0, // Avoid the flash caused by the panel reset
+        .hpoint = 0,
+    };
+    ledc_channel_config(&ledc_channel);
     ledc_fade_func_install(0);
 #endif
 
@@ -203,7 +213,7 @@ void rg_lgfx_set_backlight(float percent)
 {
     float level = RG_MIN(RG_MAX(percent / 100.f, 0.f), 1.f);
 #ifdef RG_GPIO_LCD_BCKL
-    if (ledc_set_fade_time_and_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 0x1FFF * level, 50, 0) != ESP_OK)
+    if (ledc_set_fade_time_and_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 0x1FFF * level, 50, LEDC_FADE_NO_WAIT) != ESP_OK)
         RG_LOGE("Failed to set backlight to %d%%", (int)(100 * level));
 #else
     (void)level; // Backlight is hardwired on this target

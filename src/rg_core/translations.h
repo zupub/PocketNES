@@ -692,12 +692,6 @@ static const char *translations[][RG_LANG_MAX] =
         [RG_LANG_DE] = "Geschwindigkeit",
         [RG_LANG_ZH] = "速度",
     },
-    {
-        [RG_LANG_EN] = "Overclock",
-        [RG_LANG_FR] = "Overclock",
-        [RG_LANG_DE] = "Übertaktung",
-        [RG_LANG_ZH] = "超频",
-    },
 
     // about menu
     {
@@ -1215,6 +1209,18 @@ static const char *translations[][RG_LANG_MAX] =
         [RG_LANG_ZH] = "重启到启动器",
     },
     {
+        [RG_LANG_EN] = "Restart",
+        [RG_LANG_FR] = "Redémarrer",
+        [RG_LANG_DE] = "Neustart",
+        [RG_LANG_ZH] = "重启",
+    },
+    {
+        [RG_LANG_EN] = "Power off",
+        [RG_LANG_FR] = "Éteindre",
+        [RG_LANG_DE] = "Ausschalten",
+        [RG_LANG_ZH] = "关机",
+    },
+    {
         [RG_LANG_EN] = "Recovery mode",
         [RG_LANG_FR] = "Mode de récupération",
         [RG_LANG_DE] = "Wiederherstellungsmodus",
@@ -1233,4 +1239,54 @@ static const char *translations[][RG_LANG_MAX] =
         [RG_LANG_ZH] = "保存失败",
     },
     // end of rg_system.c
+
+    // --- strings that were still hardcoded English in the GUI and system dialogs ---
+    {
+        [RG_LANG_EN] = "Slot %d",
+        [RG_LANG_FR] = "Emplacement %d",
+        [RG_LANG_DE] = "Slot %d",
+        [RG_LANG_ZH] = "存档位 %d",
+    },
+    {
+        [RG_LANG_EN] = "Slot %d (last used)",
+        [RG_LANG_FR] = "Emplacement %d (dernier)",
+        [RG_LANG_DE] = "Slot %d (zuletzt)",
+        [RG_LANG_ZH] = "存档位 %d（上次用）",
+    },
+    {
+        [RG_LANG_EN] = "Slot %d is empty",
+        [RG_LANG_FR] = "Emplacement %d vide",
+        [RG_LANG_DE] = "Slot %d ist leer",
+        [RG_LANG_ZH] = "存档位 %d 为空",
+    },
+    {
+        [RG_LANG_EN] = "Credits",
+        [RG_LANG_FR] = "Credits",
+        [RG_LANG_DE] = "Credits",
+        [RG_LANG_ZH] = "致谢",
+    },
+    {
+        [RG_LANG_EN] = "External memory not detected",
+        [RG_LANG_FR] = "Mémoire externe absente",
+        [RG_LANG_DE] = "Kein externer Speicher",
+        [RG_LANG_ZH] = "未检测到外部内存",
+    },
+    {
+        [RG_LANG_EN] = "Boot will continue but it will surely crash...",
+        [RG_LANG_FR] = "Le démarrage continue mais il va sûrement planter...",
+        [RG_LANG_DE] = "Der Start läuft weiter, stürzt aber sicher ab...",
+        [RG_LANG_ZH] = "启动将继续，但很可能会崩溃……",
+    },
+    {
+        [RG_LANG_EN] = "NSF Player",
+        [RG_LANG_FR] = "Lecteur NSF",
+        [RG_LANG_DE] = "NSF-Player",
+        [RG_LANG_ZH] = "NSF 播放器",
+    },
+    {
+        [RG_LANG_EN] = "Overclock",
+        [RG_LANG_FR] = "Overclocking",
+        [RG_LANG_DE] = "Übertaktung",
+        [RG_LANG_ZH] = "超频",
+    },
 };

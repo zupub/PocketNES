@@ -1,8 +1,13 @@
 // Retro-Go configuration (modified for the standalone NES PlatformIO build)
+// The active target is selected by -DRG_TARGET_<NAME>=1 in platformio.ini:
+//   nes-s3-st7789      -> targets/my-s3-st7789/config.h      (8-button board)
+//   nes-s3-st7789-ble  -> targets/my-s3-st7789-ble/config.h  (2.8" BLE board)
 #if defined(RG_TARGET_MY_S3_ST7789)
 #include "targets/my-s3-st7789/config.h"
+#elif defined(RG_TARGET_MY_S3_ST7789_BLE)
+#include "targets/my-s3-st7789-ble/config.h"
 #else
-#error "No target defined. Add -DRG_TARGET_MY_S3_ST7789=1 to build_flags."
+#error "No target defined. Add -DRG_TARGET_MY_S3_ST7789=1 (or RG_TARGET_MY_S3_ST7789_BLE=1) to build_flags."
 #endif
 
 #ifndef RG_PROJECT_NAME

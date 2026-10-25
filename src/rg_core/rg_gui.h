@@ -127,6 +127,8 @@ void rg_gui_draw_image(int x_pos, int y_pos, int width, int height, bool resampl
 void rg_gui_draw_icons(void);
 void rg_gui_draw_hourglass(void); // This should be moved to system or display...
 void rg_gui_draw_status_bars(void);
+void rg_gui_set_statusbar_visible(bool visible);
+void rg_gui_poll_status_icons(void); // periodic call from GUI loops, refreshes the BLE icon
 void rg_gui_draw_virtual_keyboard(int x_pos, int y_pos, const rg_keyboard_layout_t *map, int cursor_pos, bool partial_redraw);
 void rg_gui_draw_input_screen(const char *title, const char *message, const char *input_buffer,
                               const rg_keyboard_layout_t *layout_ptr, int cursor_pos, bool partial_redraw);

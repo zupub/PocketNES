@@ -20,6 +20,10 @@
 static esp_adc_cal_characteristics_t adc_chars;
 #endif
 
+#if RG_INPUT_BLE_GAMEPAD
+#include "drivers/input/ble_gamepad.h"
+#endif
+
 #ifdef RG_GAMEPAD_ADC_MAP
 static rg_keymap_adc_t keymap_adc[] = RG_GAMEPAD_ADC_MAP;
 #endif
@@ -131,6 +135,11 @@ bool rg_input_read_gamepad_raw(uint32_t *out)
         if (gpio_get_level(mapping->num) == mapping->level)
             state |= mapping->key;
     }
+#endif
+
+#if RG_INPUT_BLE_GAMEPAD
+    // BLE 手柄状态由驱动内的通知回调实时更新（未连接时为 0）
+    state |= rg_ble_gamepad_get_state();
 #endif
 
 #if defined(RG_GAMEPAD_I2C_MAP)
@@ -334,6 +343,13 @@ void rg_input_init(void)
     UPDATE_GLOBAL_MAP(keymap_serial);
 #endif
 
+
+#if RG_INPUT_BLE_GAMEPAD
+    RG_LOGI("Initializing BLE gamepad driver...\n");
+    rg_ble_gamepad_init();
+    gamepad_mapped |= RG_KEY_UP | RG_KEY_DOWN | RG_KEY_LEFT | RG_KEY_RIGHT |
+                      RG_KEY_A | RG_KEY_B | RG_KEY_SELECT | RG_KEY_START | RG_KEY_MENU;
+#endif
 
 #if RG_BATTERY_DRIVER == 1 /* ADC */
     RG_LOGI("Initializing ADC battery driver...");

@@ -1,6 +1,7 @@
 #include "shared.h"
 
 #include <nofrendo.h>
+#include "rg_gui.h" // rg_gui_set_statusbar_visible()
 
 static int overscan = true;
 static int autocrop = 0;
@@ -157,6 +158,7 @@ static rg_gui_event_t palette_update_cb(rg_gui_option_t *option, rg_gui_event_t 
 
 static void blit_screen(uint8 *bmp)
 {
+    rg_gui_set_statusbar_visible(false); // a game frame is going out, no menu is on screen
     slowFrame = bmp && !rg_display_sync(false);
     // A rolling average should be used for autocrop == 1, it causes jitter in some games...
     // int crop_h = (autocrop == 2) || (autocrop == 1 && nes->ppu->left_bg_counter > 210) ? 8 : 0;
@@ -182,7 +184,7 @@ static void nsf_draw_overlay(void)
         RG_DIALOG_END,
     };
     snprintf(song, sizeof(song), "%d / %d", nsf_current_song, header->total_songs);
-    rg_gui_draw_dialog("NSF Player", options, 4, -1);
+    rg_gui_draw_dialog(_("NSF Player"), options, 4, -1);
 }
 
 

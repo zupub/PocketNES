@@ -24,6 +24,8 @@
 #include <SDL2/SDL_mutex.h>
 #endif
 
+#include "rg_pwrkey.h" // rg_pwrkey_shutdown() from the recovery menu
+
 #define RG_STRUCT_MAGIC 0x12345678
 #define RG_LOGBUF_SIZE 2048
 typedef struct
@@ -321,17 +323,83 @@ static void system_monitor_task(void *arg)
     }
 }
 
-static void enter_recovery_mode(void)
+// Never returns: loops in the menu or exits via rg_system_exit()/switch_app().
+// Exposed as rg_system_enter_recovery() so the boot logo can offer a second,
+// strapping-proof entry (BOOT held at power-on may be swallowed by the ROM on
+// GPIO0-strapped boards).
+void rg_system_enter_recovery(void)
 {
     RG_LOGW("Entering recovery mode...\n");
 
     // FIXME: At this point we don't have valid settings, we should find way to get the user's language...
+    // Single-app build (one factory partition labeled "app"): "Reboot to
+    // factory/launcher" both just rebooted into this same app anyway, so the
+    // menu is Reset / Restart / Power off instead.
     const rg_gui_option_t options[] = {
         {0, _("Reset all settings"), NULL, RG_DIALOG_FLAG_NORMAL, NULL},
-        {1, _("Reboot to factory "), NULL, RG_DIALOG_FLAG_NORMAL, NULL},
-        {2, _("Reboot to launcher"), NULL, RG_DIALOG_FLAG_NORMAL, NULL},
+        {1, _("Restart"), NULL, RG_DIALOG_FLAG_NORMAL, NULL},
+        {2, _("Power off"), NULL, RG_DIALOG_FLAG_NORMAL, NULL},
         RG_DIALOG_END,
     };
+
+#ifdef RG_RECOVERY_TWO_KEY_UI
+    // This board has no usable d-pad: BOOT (GPIO 0, seen as RG_KEY_RIGHT) and the
+    // power key are the recovery buttons, so the generic rg_gui_dialog() keymap
+    // (UP/DOWN to move, A to accept) can't be driven here. Instead: short-press
+    // BOOT to cycle the selection, short-press the power key to activate the
+    // selected entry.
+    // The power key is sampled directly rather than through the gamepad keymap:
+    // it must never act as A/B once the GUI starts (a short press used to launch
+    // the selected ROM). Recovery is the one place it acts as a button, because
+    // the BLE gamepad isn't connected yet this early in boot.
+    const uint32_t menu_keys = RG_KEY_RIGHT;
+    const char *title = _("Recovery mode");
+    int selected = 0;
+
+    rg_gui_draw_dialog(title, options, 3, selected);
+
+    while (true)
+    {
+        uint32_t pressed = rg_input_read_gamepad() & menu_keys;
+        bool activate = rg_pwrkey_is_down();
+
+        if (!pressed && !activate)
+        {
+            rg_gui_poll_status_icons();
+            rg_task_delay(20);
+            continue;
+        }
+
+        if (activate)
+        {
+            switch (selected)
+            {
+            case 0:
+                rg_storage_delete(RG_BASE_PATH_CONFIG);
+                rg_storage_delete(RG_BASE_PATH_CACHE);
+                break;
+            case 1:
+                rg_system_restart(); // never returns
+            case 2:
+            default:
+                rg_pwrkey_shutdown(); // never returns on battery power
+            }
+        }
+        else
+        {
+            selected = (selected + 1) % 3;
+        }
+
+        // Option 0 keeps us in recovery mode; option 1 restarts, option 2 powers off.
+        rg_gui_draw_dialog(title, options, 3, selected);
+
+        // Wait for release so a single press advances exactly one step.
+        while ((rg_input_read_gamepad() & menu_keys) || rg_pwrkey_is_down())
+            rg_task_delay(20);
+        rg_task_delay(20);
+    }
+#else
+    // Generic boards: d-pad to move, A to accept, via the standard dialog.
     while (true)
     {
         switch (rg_gui_dialog(_("Recovery mode"), options, -1))
@@ -341,12 +409,17 @@ static void enter_recovery_mode(void)
             rg_storage_delete(RG_BASE_PATH_CACHE);
             break;
         case 1:
-            rg_system_switch_app(RG_APP_FACTORY, 0, 0, 0);
+            rg_system_restart(); // never returns
         case 2:
         default:
-            rg_system_exit();
+#ifdef RG_GPIO_PWR_KEY
+            rg_pwrkey_shutdown(); // never returns on battery power
+#else
+            rg_system_exit(); // never returns (no soft-power circuit on this board)
+#endif
         }
     }
+#endif // RG_RECOVERY_TWO_KEY_UI
 }
 
 static void platform_init(void)
@@ -468,7 +541,7 @@ rg_app_t *rg_system_init(int sampleRate, const rg_handlers_t *handlers, void *_u
 
     if (enterRecoveryMode)
     {
-        enter_recovery_mode();
+        rg_system_enter_recovery();
     }
     else if (showCrashDialog)
     {
@@ -483,7 +556,7 @@ rg_app_t *rg_system_init(int sampleRate, const rg_handlers_t *handlers, void *_u
                 strcat(message, "\nLog saved to SD Card.");
         }
         rg_display_clear(C_BLUE);
-        rg_gui_alert("System Panic!", message);
+        rg_gui_alert(_("System Panic!"), message);
         rg_system_exit();
     }
     memset(&panicTrace, 0, sizeof(panicTrace));
@@ -513,7 +586,7 @@ rg_app_t *rg_system_init(int sampleRate, const rg_handlers_t *handlers, void *_u
 #endif
 
     if (app.lowMemoryMode)
-        rg_gui_alert("External memory not detected", "Boot will continue but it will surely crash...");
+        rg_gui_alert(_("External memory not detected"), _("Boot will continue but it will surely crash..."));
 
     if (app.bootFlags & RG_BOOT_ONCE)
         update_boot_config(RG_APP_LAUNCHER, NULL, NULL, 0);
@@ -1342,7 +1415,7 @@ bool rg_emu_save_state(uint8_t slot)
         RG_LOGE("Save failed!\n");
         rename(filename, tempname(".bak"));
         remove(tempname(".new"));
-        rg_gui_alert("Save failed", NULL);
+        rg_gui_alert(_("Save failed"), NULL);
     }
     else
     {

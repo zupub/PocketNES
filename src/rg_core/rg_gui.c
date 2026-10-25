@@ -11,6 +11,10 @@
 #include "bitmaps/image_hourglass.h"
 #include "fonts/fonts.h"
 
+#if RG_INPUT_BLE_GAMEPAD
+#include "drivers/input/ble_gamepad.h" // status bar BT icon
+#endif
+
 static struct
 {
     uint16_t *screen_buffer, *draw_buffer;
@@ -668,6 +672,60 @@ void rg_gui_draw_icons(void)
         rg_gui_draw_rect(x_pos, y_pos - seg_height * 3, seg_width, seg_height * 3, 1, color_border, color_fill);
     }
 
+#if RG_INPUT_BLE_GAMEPAD
+    if (rg_ble_gamepad_is_connected())
+    {
+        // 16x16 Bluetooth rune, 1bpp, row-major, MSB first (two bytes per row).
+        // The previous version was an 11x13 hand plot with no consistent geometry:
+        // its "diagonals" jumped sideways from row to row and read as a smudge at
+        // this size. This one follows the real rune: a vertical stroke at x=7, two
+        // chevrons reaching x=12 at rows 4 and 10, and two diagonals from x=3 that
+        // meet the stroke at the centre (row 7). Both halves are pixel-identical.
+        // Status bars are only redrawn by the GUI, so the icon shows up in menus and
+        // the file picker, not during gameplay.
+        static const uint8_t bt_icon[16][2] = {
+            {0x01, 0x00}, // .......#........
+            {0x01, 0x80}, // .......##.......
+            {0x01, 0x20}, // .......#..#.....
+            {0x11, 0x10}, // ...#...#...#....
+            {0x09, 0x08}, // ....#..#....#...
+            {0x05, 0x20}, // .....#.#..#.....
+            {0x03, 0x40}, // ......##.#......
+            {0x01, 0x00}, // .......#........  centre
+            {0x03, 0x40}, // ......##.#......
+            {0x05, 0x20}, // .....#.#..#.....
+            {0x09, 0x08}, // ....#..#....#...
+            {0x11, 0x10}, // ...#...#...#....
+            {0x01, 0x20}, // .......#..#.....
+            {0x01, 0x80}, // .......##.......
+            {0x01, 0x00}, // .......#........
+            {0x00, 0x00}, // ................
+        };
+        right += 16;
+
+        int x_pos = -right;
+        // Emit one rect per horizontal run instead of one per pixel: ~28 calls
+        // against 143 before. The bar_height guard keeps the last row inside the
+        // status bar on the smaller fonts.
+        for (int y = 0; y < 16 && icon_top + y < bar_height; ++y)
+        {
+            uint32_t row_bits = ((uint32_t)bt_icon[y][0] << 8) | bt_icon[y][1];
+            for (int x = 0; x < 16; )
+            {
+                if (!(row_bits & (0x8000u >> x)))
+                {
+                    x++;
+                    continue;
+                }
+                int run_start = x;
+                while (x < 16 && (row_bits & (0x8000u >> x)))
+                    x++;
+                rg_gui_draw_rect(x_pos + run_start, icon_top + y, x - run_start, 1, 0, 0, C_SILVER);
+            }
+        }
+    }
+#endif
+
     if (gui.show_clock)
     {
         right += txt.width + 4;
@@ -692,6 +750,28 @@ void rg_gui_draw_hourglass(void)
         image_hourglass.height,
         image_hourglass.width * 2,
         (uint16_t*)image_hourglass.pixel_data, 0);
+}
+
+// Whether a GUI status bar is currently on screen (menus and pickers only).
+// Game frames bypass rg_gui (blit_screen -> rg_display_submit), so nes_main
+// clears this flag via rg_gui_set_statusbar_visible(false).
+static bool statusbar_visible = false;
+static bool statusbar_ble_shown = false; // BLE state as last painted
+
+void rg_gui_set_statusbar_visible(bool visible)
+{
+    statusbar_visible = visible;
+}
+
+// Periodic poll for the GUI loops: when the gamepad connection state changed
+// while a menu is on screen, repaint the status bar (e.g. the BLE icon).
+// Runs in the task that owns the GUI, so there is no draw race.
+void rg_gui_poll_status_icons(void)
+{
+#if RG_INPUT_BLE_GAMEPAD
+    if (statusbar_visible && rg_ble_gamepad_is_connected() != statusbar_ble_shown)
+        rg_gui_draw_status_bars();
+#endif
 }
 
 void rg_gui_draw_status_bars(void)
@@ -724,6 +804,10 @@ void rg_gui_draw_status_bars(void)
     rg_gui_draw_text(0, RG_GUI_BOTTOM, gui.screen_width, footer, C_WHITE, C_BLACK, 0);
 
     rg_gui_draw_icons();
+#if RG_INPUT_BLE_GAMEPAD
+    statusbar_ble_shown = rg_ble_gamepad_is_connected();
+#endif
+    statusbar_visible = true;
 }
 
 static size_t get_dialog_items_count(const rg_gui_option_t *options)
@@ -1002,6 +1086,16 @@ intptr_t rg_gui_dialog(const char *title, const rg_gui_option_t *options_const, 
             else if (joystick & RG_KEY_DOWN) {
                 if (++sel > options_count - 1) sel = 0;
             }
+            // A is checked before B: on targets where A and B share a single GPIO
+            // (e.g. MY-S3-ST7789 / DIJI-NES-2.8 hardware) the button registers both
+            // keys at once and must act as "select", not "cancel".
+            else if (joystick & RG_KEY_A && callback) {
+                event = callback(&options[sel], RG_DIALOG_ENTER);
+                redraw = true;
+            }
+            else if (joystick & RG_KEY_A && active_selection) {
+                event = RG_DIALOG_SELECT;
+            }
             else if (joystick & (RG_KEY_B|RG_KEY_OPTION|RG_KEY_MENU)) {
                 event = RG_DIALOG_CANCEL;
             }
@@ -1012,13 +1106,6 @@ intptr_t rg_gui_dialog(const char *title, const rg_gui_option_t *options_const, 
             else if (joystick & RG_KEY_RIGHT && callback) {
                 event = callback(&options[sel], RG_DIALOG_NEXT);
                 redraw = true;
-            }
-            else if (joystick & RG_KEY_A && callback) {
-                event = callback(&options[sel], RG_DIALOG_ENTER);
-                redraw = true;
-            }
-            else if (joystick & RG_KEY_A && active_selection) {
-                event = RG_DIALOG_SELECT;
             }
 
             joystick_last = rg_system_timer();
@@ -1071,7 +1158,7 @@ intptr_t rg_gui_dialog(const char *title, const rg_gui_option_t *options_const, 
             rg_gui_draw_dialog(title, options, options_count, sel);
             redraw = false;
         }
-
+        rg_gui_poll_status_icons(); // refresh the BLE icon while idling
         rg_task_delay(20);
         rg_system_tick(0);
     }
@@ -1795,6 +1882,9 @@ static rg_gui_event_t language_cb(rg_gui_option_t *option, rg_gui_event_t event)
             rg_gui_set_language_id(sel);
             if (rg_gui_confirm(_("Language changed!"), _("For these changes to take effect you must restart your device.\nrestart now?"), true))
             {
+                // rg_system_exit() reboots without ever reaching the rg_settings_commit()
+                // at the end of rg_gui_options_menu(), so persist the new language here.
+                rg_settings_commit();
                 rg_system_exit();
             }
             language_id = sel;
@@ -1810,7 +1900,7 @@ static rg_gui_event_t border_update_cb(rg_gui_option_t *option, rg_gui_event_t e
 {
     if (event == RG_DIALOG_ENTER)
     {
-        char *path = rg_gui_file_picker("Border", RG_BASE_PATH_BORDERS, NULL, false, true);
+        char *path = rg_gui_file_picker(_("Border"), RG_BASE_PATH_BORDERS, NULL, false, true);
         if (path != NULL)
         {
             rg_display_set_border(strlen(path) ? path : NULL);
@@ -2118,6 +2208,7 @@ void rg_gui_options_menu(void)
         #if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S3 // && !RG_BUILD_RELEASE
         {0, _("Overclock"),     "-", RG_DIALOG_FLAG_NORMAL, &overclock_cb},
         #endif
+        {0, _("Language"),      "-", RG_DIALOG_FLAG_NORMAL, &language_cb},
         {0, _("Emulator options"), NULL, RG_DIALOG_FLAG_NORMAL, &app_options_cb},
         RG_DIALOG_END,
     };
@@ -2164,7 +2255,7 @@ void rg_gui_about_menu(void)
         {
             case 1:
                 // FIXME: This should probably be a regular dialog so that it's scrollable!
-                rg_gui_alert("Credits", RG_PROJECT_CREDITS);
+                rg_gui_alert(_("Credits"), RG_PROJECT_CREDITS);
                 break;
             case 2:
                 rg_gui_debug_menu();
@@ -2303,13 +2394,13 @@ static rg_gui_event_t slot_select_cb(rg_gui_option_t *option, rg_gui_event_t eve
         {
             preview = rg_surface_load_image_file(slot->preview, 0);
             if (slot->is_lastused)
-                snprintf(buffer, sizeof(buffer), "Slot %d (last used)", slot->id);
+                snprintf(buffer, sizeof(buffer), _("Slot %d (last used)"), slot->id);
             else
-                snprintf(buffer, sizeof(buffer), "Slot %d", slot->id);
+                snprintf(buffer, sizeof(buffer), _("Slot %d"), slot->id);
         }
         else
         {
-            snprintf(buffer, sizeof(buffer), "Slot %d is empty", slot->id);
+            snprintf(buffer, sizeof(buffer), _("Slot %d is empty"), slot->id);
             color = C_RED;
         }
         rg_gui_draw_image(0, margin, gui.screen_width, gui.screen_height - margin * 2, true, preview);

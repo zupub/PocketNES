@@ -6,17 +6,18 @@
  * then nes_main() runs the emulator and never returns.
  */
 #include <Arduino.h>
-#include <string.h>
+#include <driver/gpio.h>
 #include "rg_system.h"
+#include "rg_pwrkey.h"
 #include "rg_surface.h"
 #include "rg_display.h"
-#include "rg_gui.h"
 #include "drivers/display/lovyangfx_bridge.h"
 #include "shared.h"
 
 #ifdef RG_BOOT_LOGO
 // startup.png is embedded into the firmware (see board_build.embed_files in
-// platformio.ini). objcopy names the symbols after the file path.
+// platformio.ini, enabled for both envs). objcopy names the symbols
+// after the file path.
 extern const uint8_t boot_png_start[] asm("_binary_startup_png_start");
 extern const uint8_t boot_png_end[] asm("_binary_startup_png_end");
 
@@ -129,12 +130,22 @@ static void show_boot_logo(void)
     }
     rg_surface_free(scaled);
 
-    // Keep the logo on screen for a moment; it is replaced by the GUI below.
-    vTaskDelay(pdMS_TO_TICKS(1500));
+    // While the logo is up, a short press of BOOT (GPIO 0, already configured
+    // as input-pullup by rg_input_init) also jumps into the recovery menu.
+    // This is the reliable entry point: BOOT is a strapping pin, so holding it
+    // at power-on may drop the chip into the ROM download mode instead (black
+    // screen), in which case this path still works on the next boot attempt.
+    uint32_t deadline = millis() + 1500;
+    while (millis() < deadline)
+    {
+        if (gpio_get_level(GPIO_NUM_0) == 0)
+            rg_system_enter_recovery(); // never returns
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
 
-    // Clear to black before entering the GUI. The file picker and the other
-    // menus draw incrementally (only their own rects) and assume the panel
-    // starts out black - any leftover logo would otherwise stay visible
+    // Fade the logo out to black before entering the GUI. The file picker and
+    // the other menus draw incrementally (only their own rects) and assume the
+    // panel starts out black - any leftover logo would otherwise stay visible
     // around their dialogs, like a burn-in (it shares the screen center).
     rg_display_clear(C_BLACK);
 }
@@ -142,6 +153,10 @@ static void show_boot_logo(void)
 
 static void emulator_task(void *arg)
 {
+    // Latch the soft-power circuit before anything else, or the device dies as
+    // soon as the power key is released (battery powered boots only).
+    rg_pwrkey_init();
+
     rg_system_init(AUDIO_SAMPLE_RATE, NULL, NULL);
 
 #ifdef RG_BOOT_LOGO
