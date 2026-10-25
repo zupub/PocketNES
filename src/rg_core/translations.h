@@ -692,6 +692,12 @@ static const char *translations[][RG_LANG_MAX] =
         [RG_LANG_DE] = "Geschwindigkeit",
         [RG_LANG_ZH] = "速度",
     },
+    {
+        [RG_LANG_EN] = "Overclock",
+        [RG_LANG_FR] = "Overclock",
+        [RG_LANG_DE] = "Übertaktung",
+        [RG_LANG_ZH] = "超频",
+    },
 
     // about menu
     {
