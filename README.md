@@ -1,9 +1,9 @@
 # PocketNES
 
-A handheld **NES emulator firmware for ESP32-S3** — built with **PlatformIO** on the [Retro-Go](https://github.com/ducalex/retro-go) framework and the [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) core, driven by **LovyanGFX**, with a fully localized **Simplified Chinese UI**.
+一款面向 **ESP32-S3** 的掌机 **NES 模拟器固件** —— 使用 **PlatformIO** 构建，基于 [Retro-Go](https://github.com/ducalex/retro-go) 框架与 [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) 核心，显示驱动采用 **LovyanGFX**，界面完整本地化为**简体中文**。
 
 <div align="center">
-  
+
 ![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32-blue)
 ![ESP32-S3](https://img.shields.io/badge/MCU-ESP32--S3%20N16R8-red)
 ![License](https://img.shields.io/badge/License-GPL--2.0-green)
@@ -14,244 +14,244 @@ A handheld **NES emulator firmware for ESP32-S3** — built with **PlatformIO** 
   <strong><a href="README_EN.md">English</a> | <a href="README.md">中文</a></strong>
 </p>
 
-Drop `.nes` ROMs on an SD card, pick a game from the built-in file browser and play at full speed with sound. Every part of the UI — menus, file browser, settings, alerts — is available in Simplified Chinese.
+把 `.nes` ROM 拷到 SD 卡，通过内置文件浏览器选中游戏，即可全速带声游玩。菜单、文件浏览器、设置、提示框等全部界面均提供简体中文。
 
-The same firmware also runs on Waveshare's **ESP32-S3-Touch-LCD-2.8** board, where a BLE gamepad replaces the button cluster — see [Hardware](#hardware).
+同一份固件还可运行在微雪 **ESP32-S3-Touch-LCD-2.8** 开发板上，此时由 BLE 手柄替代实体按键 —— 详见[硬件](#硬件)。
 
-![PocketNES boot screen](assets/pocketnes-boot.png)
-![PocketNES handheld](assets/pocketnes-cover.jpg)
-![PocketNES menu](assets/pocketnes-menu.jpg)
-![PocketNES options](assets/pocketnes-option.jpg)
+![PocketNES 开机画面](assets/pocketnes-boot.png)
+![PocketNES 掌机](assets/pocketnes-cover.jpg)
+![PocketNES 掌机](assets/pocketnes-menu.jpg)
+![PocketNES 掌机](assets/pocketnes-option.jpg)
 
-## Features
+## 功能特性
 
-- **Full-speed NES emulation** — nofrendo core with 50+ mappers, 32 kHz I2S audio output
-- **Two hardware targets** — 8-button handheld and the button-less Waveshare ESP32-S3-Touch-LCD-2.8, built from one codebase
-- **LovyanGFX display backend** — `Panel_ST7789` on a dedicated SPI3 bus at 80 MHz with DMA, 320×240 landscape UI
-- **BLE gamepad input** — NimBLE HID host scans, pairs and reconnects on its own, and a Bluetooth icon appears in the status bar
-- **Soft power key** — the Waveshare board's battery-power latch is held by the firmware, and a ~2 s press powers the device off
-- **Complete Simplified Chinese interface** — 206 translated strings plus a 16×16 bitmap font with 7,544 glyphs (English / French / German are still available in the language menu)
-- **File browser** — UTF-8 filenames, long names are truncated with an ellipsis instead of wrapping
-- **Save states** — one slot per ROM, stored on SD
-- **ZIP ROM support** — load `.zip` archives directly, no need to extract
-- **Persistent settings** — JSON files on SD (`/sd/retro-go/config`)
-- **Video options** — overscan, auto-crop, NES palette selection, sprite-limit toggle
-- **One-command build & flash** with PlatformIO
+- **全速 NES 模拟** —— nofrendo 核心，支持 50+ 种 mapper，32 kHz I2S 音频输出
+- **双硬件目标** —— 8 键掌机与无按键的微雪 ESP32-S3-Touch-LCD-2.8 共用同一套代码
+- **LovyanGFX 显示后端** —— `Panel_ST7789` 独占 SPI3 总线，80 MHz 主频，DMA 推流，320×240 横屏界面
+- **BLE 手柄输入** —— NimBLE HID 主机自动扫描、配对与重连，连接后状态栏显示蓝牙图标
+- **软电源键** —— 微雪板的电池供电锁存由固件维持，长按约 2 秒可关机
+- **完整简体中文界面** —— 206 条翻译文案 + 7544 字形的 16×16 点阵字库（语言菜单中仍可切换英文 / 法文 / 德文）
+- **文件浏览器** —— 支持 UTF-8 文件名，超长文件名自动省略号截断，不再折行
+- **即时存档** —— 每个 ROM 一个存档位，保存在 SD 卡
+- **ZIP ROM 支持** —— 可直接加载 `.zip` 压缩包，无需解压
+- **设置持久化** —— JSON 配置文件保存在 SD 卡（`/sd/retro-go/config`）
+- **画面选项** —— overscan、自动裁剪、NES 调色板选择、精灵数量限制开关
+- **一条命令构建与烧录** —— 基于 PlatformIO
 
-## Hardware
+## 硬件
 
-One codebase, two board profiles. Pick the PlatformIO environment that matches your hardware:
+同一套代码支持两种板型，按硬件选择对应的 PlatformIO 环境：
 
-| Board | Display | Input | Environment |
-|-------|---------|-------|-------------|
-| 8-button handheld (DIJI-NES) | ST7789 240×320 SPI | 8 GPIO buttons | `nes-s3-st7789` |
-| Waveshare ESP32-S3-Touch-LCD-2.8 | ST7789 240×320 SPI + CST328 touch | BLE gamepad + BOOT / power keys | `nes-s3-st7789-ble` |
+| 板型 | 屏幕 | 输入 | 编译环境 |
+|------|------|------|----------|
+| 8 键掌机（DIJI-NES） | ST7789 240×320 SPI | 8 个 GPIO 按键 | `nes-s3-st7789` |
+| 微雪 ESP32-S3-Touch-LCD-2.8 | ST7789 240×320 SPI + CST328 触摸 | BLE 手柄 + BOOT/电源键 | `nes-s3-st7789-ble` |
 
-### 8-button handheld (DIJI-NES)
+### 8 键掌机（DIJI-NES）
 
-| Part | Recommendation | Notes |
-|------|----------------|-------|
-| MCU | ESP32-S3 module, **N16R8** | 16 MB flash, 8 MB **OPI** PSRAM (`qio_opi`) |
-| Display | ST7789 240×320 SPI panel | Used in landscape (320×240); backlight hardwired to VCC |
-| Audio | MAX98357A I2S DAC/amp | Mono, 32 kHz sample rate |
-| Storage | microSD card (FAT32) | On its own SPI bus |
-| Input | 8 tactile buttons | Active-low, internal pull-ups |
+| 部件 | 建议型号 | 说明 |
+|------|----------|------|
+| 主控 | ESP32-S3 模组，**N16R8** | 16 MB Flash，8 MB **OPI** PSRAM（`qio_opi`） |
+| 屏幕 | ST7789 240×320 SPI 屏 | 横屏使用（320×240）；背光直接接 VCC |
+| 音频 | MAX98357A I2S DAC/功放 | 单声道，32 kHz 采样率 |
+| 存储 | microSD 卡（FAT32） | 使用独立 SPI 总线 |
+| 输入 | 8 个轻触按键 | 低电平有效，内部上拉 |
 
-The hardware wiring follows the [DIJI-NES](https://github.com/UF-Evan/DIJI-NES) design by UF-Evan.
+硬件连接参考了 [DIJI-NES](https://github.com/UF-Evan/DIJI-NES)（UF-Evan）的设计。
 
-The display and the SD card **must** be wired to separate SPI peripherals — the firmware puts the panel on `SPI3_HOST` and the SD card on `SPI2_HOST` so they never contend for the bus.
+屏幕与 SD 卡**必须**接在不同的 SPI 外设上 —— 固件将屏幕分配到 `SPI3_HOST`、SD 卡分配到 `SPI2_HOST`，避免两者争用总线。
 
-### Pinout (8-button handheld)
+### 引脚定义（8 键掌机）
 
-**Display (SPI3)**
+**屏幕（SPI3）**
 
-| Signal | GPIO |
-|--------|------|
+| 信号 | GPIO |
+|------|------|
 | SCLK | 14 |
 | MOSI | 13 |
 | DC | 11 |
 | CS | 10 |
 | RST | 12 |
-| MISO | not connected |
-| Backlight | hardwired on |
+| MISO | 未连接 |
+| 背光 | 直接常亮 |
 
-**microSD (SPI2)**
+**microSD（SPI2）**
 
-| Signal | GPIO |
-|--------|------|
+| 信号 | GPIO |
+|------|------|
 | MISO | 39 |
 | MOSI | 41 |
 | CLK | 40 |
 | CS | 42 |
 
-**I2S DAC (MAX98357A)**
+**I2S DAC（MAX98357A）**
 
-| Signal | GPIO |
-|--------|------|
+| 信号 | GPIO |
+|------|------|
 | BCK | 5 |
 | WS | 4 |
 | DIN | 6 |
 
-**Buttons** (active-low, to GND)
+**按键**（低电平有效，接地触发）
 
-| Button | GPIO | Button | GPIO |
-|--------|------|--------|------|
-| Up | 17 | A | 48 |
-| Down | 3 | B | 47 |
-| Left | 8 | Select | 16 |
-| Right | 18 | Start | 15 |
+| 按键 | GPIO | 按键 | GPIO |
+|------|------|------|------|
+| 上 | 17 | A | 48 |
+| 下 | 3 | B | 47 |
+| 左 | 8 | Select | 16 |
+| 右 | 18 | Start | 15 |
 
-### Waveshare ESP32-S3-Touch-LCD-2.8 + BLE gamepad
+### 微雪 ESP32-S3-Touch-LCD-2.8 + BLE 手柄
 
-This is Waveshare's [ESP32-S3-Touch-LCD-2.8](https://docs.waveshare.net/ESP32-S3-Touch-LCD-2.8/) board (SKU 27690). It has no d-pad, no A/B and no MENU key, so it is played entirely from a BLE gamepad:
+这是微雪的 [ESP32-S3-Touch-LCD-2.8](https://docs.waveshare.net/ESP32-S3-Touch-LCD-2.8/) 开发板（SKU 27690）。板上没有方向键、A/B 与 MENU 键，全部操作都来自 BLE 手柄：
 
-- **Input** — a BLE HID gamepad supplies d-pad/A/B/Select/Start (see [Controls](#controls)); on the PCB only BOOT (GPIO 0) and the BAT power key remain, and they drive the recovery menu.
-- **Display** — the onboard ST7789 panel on SPI3, with SCLK 40 / MOSI 45 / DC 41 / CS 42 / RST 39 and a PWM-dimmable backlight on GPIO 5 (which is why the Brightness option appears).
-- **SD card** — the microSD slot on SPI2 with CS 21 / CLK 14 / MISO 16 / MOSI 17, clocked at 5 MHz.
-- **Audio** — the onboard PCM5101A DAC and amplifier on I2S BCLK 48 / LRCLK 38 / DIN 47; the board's volume knob still works.
-- **Power** — soft-power latch: the BAT key (GPIO 6) switches the rail on and the firmware holds it through GPIO 7. Hold it ~2 s to power off; a short press does nothing outside the recovery menu.
-- **Battery** — the MX1.25 cell input, read on GPIO 8 through a 1:3 divider.
+- **输入** —— 方向键 / A / B / Select / Start 均由 BLE HID 手柄提供（见[按键操作](#按键操作)）；板上只保留 BOOT（GPIO 0）与 BAT 电源键，用于恢复菜单。
+- **屏幕** —— 板载 ST7789：SPI3，SCLK 40 / MOSI 45 / DC 41 / CS 42 / RST 39，背光在 GPIO 5 上支持 PWM 调光（因此菜单里有亮度选项）。
+- **SD 卡** —— microSD 卡座，SPI2：CS 21 / CLK 14 / MISO 16 / MOSI 17，时钟 5 MHz。
+- **音频** —— 板载 PCM5101A DAC 与功放：BCLK 48 / LRCLK 38 / DIN 47，板上音量旋钮依然有效。
+- **电源** —— 软开关锁存：BAT 电源键（GPIO 6）开机时接通供电，固件通过 GPIO 7 维持锁存。长按约 2 秒关机；短按在恢复菜单之外不做任何事。
+- **电池** —— MX1.25 电池接口，GPIO 8 经 1:3 分压后接 ADC。
 
-The capacitive touch panel (CST328 on V1, CST3530 on V2), QMI8658 IMU, PCF85063 RTC and charge management are not used by the firmware.
+电容触摸屏（V1 为 CST328、V2 为 CST3530）、QMI8658 六轴传感器、PCF85063 RTC 与充电管理均未被固件使用。
 
-The complete pin map lives in [`src/rg_core/targets/my-s3-st7789-ble/config.h`](src/rg_core/targets/my-s3-st7789-ble/config.h).
+完整引脚映射见 [`src/rg_core/targets/my-s3-st7789-ble/config.h`](src/rg_core/targets/my-s3-st7789-ble/config.h)。
 
-<!-- TODO(photo): replace this placeholder with the real photo, keeping the same path:
-     ![PocketNES on the Waveshare ESP32-S3-Touch-LCD-2.8](assets/pocketnes-28-ble.jpg) -->
+<!-- TODO(photo)：拿到实拍图后替换本占位块，保持同一路径：
+     ![PocketNES 在微雪 ESP32-S3-Touch-LCD-2.8 上](assets/pocketnes-28-ble.jpg) -->
 
-> **Photo placeholder** — `assets/pocketnes-28-ble.jpg`: the Waveshare ESP32-S3-Touch-LCD-2.8 with a BLE gamepad connected.
+> **配图占位** —— `assets/pocketnes-28-ble.jpg`：微雪 ESP32-S3-Touch-LCD-2.8 连接 BLE 手柄的实拍图。
 
-## Build & Flash
+## 构建与烧录
 
-Requirements: [PlatformIO](https://platformio.org/) (Core CLI or the VS Code extension) and a USB cable.
+依赖：[PlatformIO](https://platformio.org/)（Core 命令行或 VS Code 插件）和一根 USB 数据线。
 
 ```bash
-# Build the 8-button handheld
+# 编译 8 键掌机
 pio run -e nes-s3-st7789
 
-# Build the Waveshare ESP32-S3-Touch-LCD-2.8 (BLE gamepad)
+# 编译微雪 ESP32-S3-Touch-LCD-2.8（BLE 手柄）
 pio run -e nes-s3-st7789-ble
 
-# Flash (auto-detected port, or pass --upload-port COM5 / /dev/ttyUSB0)
+# 烧录（自动检测串口，也可加 --upload-port COM5 / /dev/ttyUSB0 指定）
 pio run -e nes-s3-st7789 -t upload
 pio run -e nes-s3-st7789-ble -t upload
 
-# Serial log
+# 查看串口日志
 pio device monitor -b 115200
 ```
 
-The board profile is `esp32-s3-devkitc-1` with `board_build.arduino.memory_type = qio_opi` and the custom partition table `partitions_nes.csv` (4 MB app partition).
+板型配置为 `esp32-s3-devkitc-1`，`board_build.arduino.memory_type = qio_opi`，并使用自定义分区表 `partitions_nes.csv`（4 MB app 分区）。
 
-## SD Card Layout
+## SD 卡目录结构
 
 ```
 /sd/
-├── nes/                  # put .nes and .zip ROMs here
+├── nes/                  # 把 .nes 和 .zip ROM 放在这里
 └── retro-go/
-    ├── config/           # global.json, wifi.json, boot.json ...
-    └── saves/            # save states and per-ROM settings
+    ├── config/           # global.json、wifi.json、boot.json 等
+    └── saves/            # 存档和每个 ROM 的独立设置
 ```
 
-The file browser opens in `/sd/nes` on boot.
+开机后文件浏览器默认打开 `/sd/nes`。
 
-## Controls
+## 按键操作
 
-| Button | In game | In menus |
-|--------|---------|----------|
-| D-pad | Move | Navigate |
-| A | A | Confirm |
-| B | B | Back |
-| Start | Start | — |
-| Select | Select | — |
-| **Start + Select** | **Open menu** | — |
+| 按键 | 游戏中 | 菜单中 |
+|------|--------|--------|
+| 方向键 | 移动 | 导航 |
+| A | A 键 | 确认 |
+| B | B 键 | 返回 |
+| Start | Start 键 | — |
+| Select | Select 键 | — |
+| **Start + Select** | **呼出菜单** | — |
 
-The in-game menu offers resume, save state, load state, reset, options and screenshot.
+游戏内菜单提供：继续游戏、存档、读档、重置、选项设置和截图。
 
-### BLE gamepad (Waveshare board)
+### BLE 手柄（微雪开发板）
 
-The Waveshare board has no gamepad buttons, so the pad is the only controller. Put it in Android/BLE mode (not X-input or Switch) and switch the device on — the firmware scans for it at boot and reconnects by itself after a disconnect.
+微雪板没有手柄按键，手柄就是唯一控制器。请把手柄切到 Android/BLE 模式（不是 X-input 或 Switch 模式）后开机 —— 固件会自动扫描，断线后自动重连。
 
-| Gamepad | PocketNES |
-|---------|-----------|
-| D-pad | D-pad |
+| 手柄 | PocketNES |
+|------|-----------|
+| 方向键 | 方向键 |
 | A | A |
 | B | B |
 | X | B |
 | Y | A |
 | Select | Select |
 | Start | Start |
-| **Start + Select** | **Open menu** |
+| **Start + Select** | **呼出菜单** |
 
-A Bluetooth icon appears in the status bar while a pad is connected.
+手柄连接后，状态栏会显示蓝牙图标。
 
-## Configuration
+## 配置
 
-Hardware and build-time options live in the `config.h` of the selected target:
+硬件与构建期选项集中定义在所选 target 的 `config.h` 中：
 
-- [`src/rg_core/targets/my-s3-st7789/config.h`](src/rg_core/targets/my-s3-st7789/config.h) — 8-button handheld
-- [`src/rg_core/targets/my-s3-st7789-ble/config.h`](src/rg_core/targets/my-s3-st7789-ble/config.h) — Waveshare ESP32-S3-Touch-LCD-2.8
+- [`src/rg_core/targets/my-s3-st7789/config.h`](src/rg_core/targets/my-s3-st7789/config.h) —— 8 键掌机
+- [`src/rg_core/targets/my-s3-st7789-ble/config.h`](src/rg_core/targets/my-s3-st7789-ble/config.h) —— 微雪 ESP32-S3-Touch-LCD-2.8
 
-The main options:
+主要选项：
 
-- `RG_SCREEN_HOST` / `RG_SCREEN_SPEED` — panel bus and clock (SPI3 @ 80 MHz)
-- `RG_LGFX_ROTATION`, `RG_LGFX_INVERT`, `RG_LGFX_RGB_ORDER` — panel orientation and colour mode
-- `RG_GPIO_*` — display, SD, I2S and button pin maps
-- `RG_LANG_DEFAULT`, `RG_FONT_DEFAULT` — default UI language and font
-- `RG_INPUT_BLE_GAMEPAD` — enables the NimBLE gamepad driver (BLE target only)
-- `RG_GPIO_PWR_KEY` / `RG_GPIO_PWR_HOLD` — soft-power key and latch (BLE target only)
+- `RG_SCREEN_HOST` / `RG_SCREEN_SPEED` —— 屏幕总线与时钟（SPI3 @ 80 MHz）
+- `RG_LGFX_ROTATION`、`RG_LGFX_INVERT`、`RG_LGFX_RGB_ORDER` —— 屏幕方向与色彩模式
+- `RG_GPIO_*` —— 屏幕、SD 卡、I2S 和按键的引脚映射
+- `RG_LANG_DEFAULT`、`RG_FONT_DEFAULT` —— 默认界面语言与字体
+- `RG_INPUT_BLE_GAMEPAD` —— 启用 NimBLE 手柄驱动（仅 BLE target）
+- `RG_GPIO_PWR_KEY` / `RG_GPIO_PWR_HOLD` —— 软电源键与锁存（仅 BLE target）
 
-> **Panel note:** some ST7789 clones read the MADCTL BGR bit with **inverted polarity** (0xB0 = blue in the high bits, 0xB8 = red in the high bits). This target uses `rgb_order = false` (MADCTL 0xB8) and `lcd_send_buffer()` only undoes the byte pre-swap. If your panel shows red/blue swapped, flip `RG_LGFX_RGB_ORDER`.
+> **屏幕注意事项：** 部分 ST7789 克隆屏的 MADCTL BGR 位**极性是反的**（0xB0 = 蓝色高位，0xB8 = 红色高位）。本目标使用 `rgb_order = false`（MADCTL 0xB8），`lcd_send_buffer()` 只负责还原字节预交换。如果你的屏幕红蓝互换，请翻转 `RG_LGFX_RGB_ORDER`。
 
-## Project Structure
+## 项目结构
 
 ```
-├── platformio.ini              # PlatformIO environment, flags, include paths
-├── partitions_nes.csv          # NVS / OTA / 4 MB app partition table
-├── startup.png                 # boot splash (embedded at build time, decoded with lodepng)
-├── lib/LovyanGFX/              # local LovyanGFX copy (large CJK fonts excluded)
-├── lib/NimBLE-Arduino/         # local NimBLE-Arduino 1.4.3 (BLE target only)
+├── platformio.ini              # PlatformIO 环境、编译选项、include 路径
+├── partitions_nes.csv          # NVS / OTA / 4 MB app 分区表
+├── startup.png                 # 开机画面（编译期嵌入固件，lodepng 解码）
+├── lib/LovyanGFX/              # 本地 LovyanGFX（已剔除大型中日韩字库）
+├── lib/NimBLE-Arduino/         # 本地 NimBLE-Arduino 1.4.3（仅 BLE target 使用）
 └── src/
-    ├── main.cpp                # Arduino entry: rg_system_init() + emulator task
-    ├── shared.h                # C/C++ ABI boundary
-    ├── nes_main.c              # nofrendo main loop, blit, input, audio, handlers
-    ├── nofrendo/               # NES core + 50+ mappers
-    └── rg_core/                # Retro-Go framework
-        ├── rg_display.c        # streaming display pipeline
-        ├── rg_gui.c            # dialog / text engine (ellipsis truncation, etc.)
-        ├── rg_audio.c          # I2S output
-        ├── rg_settings.c       # JSON settings on SD
-        ├── rg_pwrkey.c         # soft-power key: latch at boot, ~2 s hold to shut down
+    ├── main.cpp                # Arduino 入口：rg_system_init() + 模拟器任务
+    ├── shared.h                # C/C++ ABI 边界
+    ├── nes_main.c              # nofrendo 主循环、画面输出、输入、音频、事件回调
+    ├── nofrendo/               # NES 核心 + 50+ 种 mapper
+    └── rg_core/                # Retro-Go 框架
+        ├── rg_display.c        # 流式显示管线
+        ├── rg_gui.c            # 对话框与文本引擎（省略号截断等）
+        ├── rg_audio.c          # I2S 音频输出
+        ├── rg_settings.c       # JSON 设置持久化
+        ├── rg_pwrkey.c         # 软电源键：开机锁存、长按约 2 秒关机
         ├── drivers/input/
-        │   └── ble_gamepad.{h,cpp}       # NimBLE HID gamepad host
+        │   └── ble_gamepad.{h,cpp}       # NimBLE HID 手柄主机
         ├── drivers/display/
-        │   ├── lovyangfx_bridge.{h,cpp}  # C++ bridge for rg_display.c
-        │   └── lovyangfx.h               # lcd_* C API
-        ├── fonts/efontCN16.c   # 16x16 Chinese bitmap font (7,544 glyphs)
+        │   ├── lovyangfx_bridge.{h,cpp}  # 供 rg_display.c 使用的 C++ 桥接层
+        │   └── lovyangfx.h               # lcd_* C 接口
+        ├── fonts/efontCN16.c   # 16×16 中文点阵字库（7544 字形）
         └── targets/
-            ├── my-s3-st7789/config.h     # 8-button handheld
-            └── my-s3-st7789-ble/config.h # Waveshare ESP32-S3-Touch-LCD-2.8 (BLE)
+            ├── my-s3-st7789/config.h     # 8 键掌机
+            └── my-s3-st7789-ble/config.h # 微雪 ESP32-S3-Touch-LCD-2.8（BLE）
 ```
 
-## Architecture Notes
+## 架构说明
 
-- **Boot path:** `main.cpp` → `rg_system_init()` (display, audio, input, storage, settings) → `startup.png` boot splash (cleared after ~1.5 s) → `nes_main()` which never returns.
-- **Rendering:** two `RG_PIXEL_PAL565_BE` surfaces are written alternately; `blit_screen()` applies overscan/auto-crop, then `rg_display_submit()` streams to the panel. The palette is byte-swapped at build time so both the GUI and game paths share one byte-order convention.
-- **LovyanGFX bridge:** `rg_display.c` is plain C, so `lovyangfx_bridge.cpp` exposes a small `extern "C"` API (`rg_lgfx_*`). Streaming uses `setWindow()` wrapped in `startWrite()/endWrite()` (the low-level window command does not open a SPI transaction itself) followed by `pushPixels()`.
-- **BLE input:** `ble_gamepad.cpp` owns a NimBLE scan/connect task and publishes the pad's keys through `rg_ble_gamepad_get_state()`, which `rg_input.c` ORs into the regular gamepad state. On targets without `RG_INPUT_BLE_GAMEPAD` the implementation compiles out.
-- **GUI text engine:** custom bitmap-font renderer in `rg_gui.c` with UTF-8 decoding, multiline layout, alignment and `RG_TEXT_ELLIPSIS` single-line truncation.
-- **Chinese font:** `efontCN16.c` is generated from u8g2's `lgfx_efont_cn_16` table and stored as fixed-stride records so `find_glyph()` can binary-search it.
+- **启动链路：** `main.cpp` → `rg_system_init()`（初始化屏幕、音频、输入、存储、设置）→ `startup.png` 开机画面（约 1.5 秒后清屏）→ `nes_main()`，此后不再返回。
+- **渲染：** 两块 `RG_PIXEL_PAL565_BE` 表面交替写入；`blit_screen()` 按 overscan / 自动裁剪处理后，由 `rg_display_submit()` 推流到屏幕。调色板在构建时统一做字节交换，使 GUI 与游戏两条路径共用同一套字节序约定。
+- **LovyanGFX 桥接：** `rg_display.c` 是纯 C 代码，因此由 `lovyangfx_bridge.cpp` 以 `extern "C"` 暴露一套小型 API（`rg_lgfx_*`）。推流时 `setWindow()` 必须包在 `startWrite()/endWrite()` 内（底层窗口命令不会自行开启 SPI 事务），随后调用 `pushPixels()`。
+- **BLE 输入：** `ble_gamepad.cpp` 内有一个 NimBLE 扫描/连接任务，把手柄按键通过 `rg_ble_gamepad_get_state()` 暴露出来，`rg_input.c` 将其并入常规手柄状态。未定义 `RG_INPUT_BLE_GAMEPAD` 的 target 会把整个实现编译掉。
+- **GUI 文本引擎：** `rg_gui.c` 中的自研点阵字体渲染器，支持 UTF-8 解码、多行排版、对齐，以及 `RG_TEXT_ELLIPSIS` 单行省略号截断。
+- **中文字库：** `efontCN16.c` 由 u8g2 的 `lgfx_efont_cn_16` 表转换而来，采用定长记录存储，`find_glyph()` 可对其二分查找。
 
-## Credits & License
+## 致谢与许可
 
-This project stands on the shoulders of:
+本项目离不开以下开源项目：
 
-- [Retro-Go](https://github.com/ducalex/retro-go) by ducalex — framework, GUI, settings, audio pipeline
-- [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) — NES emulation core
-- [LovyanGFX](https://github.com/lovyan03/LovyanGFX) by lovyan03 — display driver
-- [NimBLE-Arduino](https://github.com/h2zero/NimBLE-Arduino) by h2zero — BLE HID host for the gamepad
-- [DIJI-NES](https://github.com/UF-Evan/DIJI-NES) by UF-Evan — 8-button handheld hardware design and pinout reference
-- [Waveshare ESP32-S3-Touch-LCD-2.8](https://docs.waveshare.net/ESP32-S3-Touch-LCD-2.8/) — the 2.8" test board and its official pinout
-- [u8g2 / efont](https://github.com/olikraus/u8g2) by olikraus — Chinese glyph data
-- [cJSON](https://github.com/DaveGamble/cJSON) and [lodepng](https://lodev.org/lodepng/)
+- [Retro-Go](https://github.com/ducalex/retro-go)（ducalex）—— 框架、GUI、设置系统、音频管线
+- [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) —— NES 模拟核心
+- [LovyanGFX](https://github.com/lovyan03/LovyanGFX)（lovyan03）—— 显示驱动
+- [NimBLE-Arduino](https://github.com/h2zero/NimBLE-Arduino)（h2zero）—— 手柄用的 BLE HID 主机
+- [DIJI-NES](https://github.com/UF-Evan/DIJI-NES)（UF-Evan）—— 8 键掌机硬件连接与引脚定义参考
+- [Waveshare ESP32-S3-Touch-LCD-2.8](https://docs.waveshare.net/ESP32-S3-Touch-LCD-2.8/) —— 2.8 寸测试板及其官方引脚定义
+- [u8g2 / efont](https://github.com/olikraus/u8g2)（olikraus）—— 中文字形数据
+- [cJSON](https://github.com/DaveGamble/cJSON) 与 [lodepng](https://lodev.org/lodepng/)
 
-Retro-Go and nofrendo are licensed under **GPL-2.0**, so this project is distributed under the same license. See `LICENSE` for the full text.
+Retro-Go 与 nofrendo 采用 **GPL-2.0** 许可，因此本项目同样以该许可发布。完整许可文本见 `LICENSE`。
