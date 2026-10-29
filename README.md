@@ -11,7 +11,7 @@ A handheld **NES emulator firmware for ESP32-S3** — built with **PlatformIO** 
 </div>
 
 <p align="center">
-  <strong><a href="README.md">English</a> | <a href="README_CN.md">中文</a></strong>
+  <strong><a href="README_EN.md">English</a> | <a href="README.md">中文</a></strong>
 </p>
 
 Drop `.nes` ROMs on an SD card, pick a game from the built-in file browser and play at full speed with sound. Every part of the UI — menus, file browser, settings, alerts — is available in Simplified Chinese.

@@ -11,7 +11,7 @@
 </div>
 
 <p align="center">
-  <strong><a href="README.md">English</a> | <a href="README_CN.md">中文</a></strong>
+  <strong><a href="README_EN.md">English</a> | <a href="README.md">中文</a></strong>
 </p>
 
 把 `.nes` ROM 拷到 SD 卡，通过内置文件浏览器选中游戏，即可全速带声游玩。菜单、文件浏览器、设置、提示框等全部界面均提供简体中文。
