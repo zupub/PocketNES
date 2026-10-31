@@ -1,6 +1,4 @@
-# PocketNES
-
-A handheld **NES emulator firmware for ESP32-S3** — built with **PlatformIO** on the [Retro-Go](https://github.com/ducalex/retro-go) framework and the [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) core, driven by **LovyanGFX**, with a fully localized **Simplified Chinese UI**.
+![PocketNES boot screen](assets/pocketnes-boot.png)
 
 <div align="center">
   
@@ -14,11 +12,14 @@ A handheld **NES emulator firmware for ESP32-S3** — built with **PlatformIO** 
   <strong><a href="README_EN.md">English</a> | <a href="README.md">中文</a></strong>
 </p>
 
+# PocketNES
+
+A handheld **NES emulator firmware for ESP32-S3** — built with **PlatformIO** on the [Retro-Go](https://github.com/ducalex/retro-go) framework and the [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) core, driven by **LovyanGFX**, with a fully localized **Simplified Chinese UI**.
+
 Drop `.nes` ROMs on an SD card, pick a game from the built-in file browser and play at full speed with sound. Every part of the UI — menus, file browser, settings, alerts — is available in Simplified Chinese.
 
 The same firmware also runs on Waveshare's **ESP32-S3-Touch-LCD-2.8** board, where a BLE gamepad replaces the button cluster — see [Hardware](#hardware).
 
-![PocketNES boot screen](assets/pocketnes-boot.png)
 ![PocketNES handheld](assets/pocketnes-cover.jpg)
 ![PocketNES menu](assets/pocketnes-menu.jpg)
 ![PocketNES options](assets/pocketnes-option.jpg)
