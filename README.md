@@ -1,7 +1,4 @@
-# PocketNES
-
-一款面向 **ESP32-S3** 的掌机 **NES 模拟器固件** —— 使用 **PlatformIO** 构建，基于 [Retro-Go](https://github.com/ducalex/retro-go) 框架与 [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) 核心，显示驱动采用 **LovyanGFX**，界面完整本地化为**简体中文**。
-
+![PocketNES 开机画面](assets/pocketnes-boot.png)
 <div align="center">
 
 ![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32-blue)
@@ -14,11 +11,15 @@
   <strong><a href="README_EN.md">English</a> | <a href="README.md">中文</a></strong>
 </p>
 
+# PocketNES
+
+一款面向 **ESP32-S3** 的掌机 **NES 模拟器固件** —— 使用 **PlatformIO** 构建，基于 [Retro-Go](https://github.com/ducalex/retro-go) 框架与 [nofrendo](https://github.com/ducalex/retro-go/tree/dev/cores) 核心，显示驱动采用 **LovyanGFX**，界面完整本地化为**简体中文**。
+
+
 把 `.nes` ROM 拷到 SD 卡，通过内置文件浏览器选中游戏，即可全速带声游玩。菜单、文件浏览器、设置、提示框等全部界面均提供简体中文。
 
 同一份固件还可运行在微雪 **ESP32-S3-Touch-LCD-2.8** 开发板上，此时由 BLE 手柄替代实体按键 —— 详见[硬件](#硬件)。
 
-![PocketNES 开机画面](assets/pocketnes-boot.png)
 ![PocketNES 掌机](assets/pocketnes-cover.jpg)
 ![PocketNES 掌机](assets/pocketnes-menu.jpg)
 ![PocketNES 掌机](assets/pocketnes-option.jpg)
